@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionCare Eye Hospital | Ranchi</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        medical: {
+                            deepteal: '#0F766E', /* Teal 700 */
+                            mint: '#CCFBF1',     /* Teal 50 */
+                            lightmint: '#F0FDFA', /* Teal 50 lighter */
+                            slate: '#64748B',    /* Slate 500 */
+                            darkslate: '#334155' /* Slate 700 */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Carousel Transitions */
+        .slide {
+            transition: opacity 1.5s ease-in-out, transform 10s linear;
+            opacity: 0;
+            transform: scale(1.05);
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+        }
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 20;
+        }
+        /* Tab Transitions */
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+        /* Hide scrollbar for tab horizontal scrolling on mobile */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="font-sans text-medical-darkslate antialiased bg-gray-50 flex flex-col min-h-screen">
+
+    <header class="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-sm z-50 border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <a href="#home" class="flex-shrink-0 flex items-center gap-2 group">
+                    <div class="bg-medical-mint p-2 rounded-xl group-hover:bg-medical-deepteal transition-colors duration-300">
+                        <svg class="w-6 h-6 text-medical-deepteal group-hover:text-white transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-2xl text-medical-deepteal tracking-tight">VisionCare</span>
+                </a>
+                
+                <!-- Desktop Navigation -->
+                <nav class="hidden lg:flex space-x-10">
+                    <a href="#home" class="text-medical-slate hover:text-medical-deepteal font-semibold transition-colors">Home</a>
+                    <a href="#about" class="text-medical-slate hover:text-medical-deepteal font-semibold transition-colors">About</a>
+                    <a href="#locations" class="text-medical-slate hover:text-medical-deepteal font-semibold transition-colors">Locations</a>
+                    <a href="#appointment" class="text-medical-slate hover:text-medical-deepteal font-semibold transition-colors">Appointment</a>
+                </nav>
+
+                <!-- Call to Action -->
+                <div class="hidden lg:flex items-center">
+                    <button class="bg-gray-100 text-gray-400 px-6 py-2.5 rounded-full font-bold transition-all flex items-center gap-2 relative group cursor-not-allowed border border-gray-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                        Call Us 
+                        <span class="absolute -bottom-10 left-1/2 -translate-x-1/2 bg-medical-darkslate text-white text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-lg">Coming Soon</span>
+                    </button>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="lg:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-medical-slate hover:text-medical-deepteal focus:outline-none p-2 bg-gray-50 rounded-lg">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-4 shadow-lg absolute w-full left-0">
+            <a href="#home" class="mobile-link block text-medical-darkslate font-semibold text-lg py-2 hover:bg-medical-mint px-4 rounded-lg transition-colors">Home</a>
+            <a href="#about" class="mobile-link block text-medical-darkslate font-semibold text-lg py-2 hover:bg-medical-mint px-4 rounded-lg transition-colors">About</a>
+            <a href="#locations" class="mobile-link block text-medical-darkslate font-semibold text-lg py-2 hover:bg-medical-mint px-4 rounded-lg transition-colors">Locations</a>
+            <a href="#appointment" class="mobile-link block text-medical-darkslate font-semibold text-lg py-2 hover:bg-medical-mint px-4 rounded-lg transition-colors">Appointment</a>
+            <div class="pt-4 border-t border-gray-100">
+                <button class="w-full bg-gray-100 text-gray-400 px-6 py-3 rounded-xl font-bold cursor-not-allowed border border-gray-200">
+                    Call Us (Coming Soon)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <!-- Hero Section: Adjusted height to prevent overlap with header, completely removed subtext -->
+        <section id="home" class="relative mt-20 h-[60vh] md:h-[calc(100vh-5rem)] min-h-[500px] w-full overflow-hidden bg-medical-darkslate">
+            
+            <!-- Slider Images -->
+            <div class="relative w-full h-full bg-medical-deepteal">
+                <div class="slide active">
+                    <img src="https://images.unsplash.com/photo-1579684385127-1ef15d508118?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Hospital Gallery 1" class="object-cover w-full h-full opacity-60 mix-blend-overlay">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1530497610245-94d3c16cda28?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Hospital Gallery 2" class="object-cover w-full h-full opacity-60 mix-blend-overlay">
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80" alt="Hospital Gallery 3" class="object-cover w-full h-full opacity-60 mix-blend-overlay">
+                </div>
+            </div>
+
+            <!-- Overlay Content (No overlapping subtext) -->
+            <div class="absolute inset-0 z-30 flex flex-col items-center justify-center text-center px-4 bg-gradient-to-b from-black/40 via-transparent to-black/60">
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-tight drop-shadow-2xl">
+                    Clear Vision,<br class="md:hidden"/> Better Life.
+                </h1>
+            </div>
+            
+            <!-- Bottom decorative curve -->
+            <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none z-30">
+                <svg class="relative block w-full h-[50px] md:h-[80px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                    <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="#F9FAFB"></path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- About Doctor Section -->
+        <section id="about" class="py-20 md:py-32 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Flex layout: Text on Left, Portrait on Right (Reverse on Mobile) -->
+                <div class="flex flex-col-reverse lg:flex-row items-center justify-between gap-12 lg:gap-20">
+                    
+                    <!-- Left Side: Details -->
+                    <div class="lg:w-1/2 space-y-6">
+                        <div class="inline-block px-4 py-2 bg-medical-mint text-medical-deepteal font-bold rounded-full text-sm tracking-wide mb-2 uppercase">
+                            Lead Specialist
+                        </div>
+                        <h2 class="text-4xl md:text-5xl font-extrabold text-medical-darkslate tracking-tight">
+                            About <span class="text-medical-deepteal">The Doctor</span>
+                        </h2>
+                        
+                        <p class="text-xl md:text-2xl font-semibold text-gray-800 leading-snug pt-4 border-t-2 border-gray-200">
+                            Dr. Arun Kumar is a highly acclaimed ophthalmologist with a specialized focus on anterior segment surgery and comprehensive eye care.
+                        </p>
+                        
+                        <div class="text-medical-slate text-lg leading-relaxed space-y-4">
+                            <p>
+                                With over <strong>20 years of clinical and surgical experience</strong>, Dr. Kumar has successfully performed more than 15,000 cataract surgeries and numerous complex glaucoma procedures. He is dedicated to utilizing the latest advancements in medical technology to preserve and restore sight.
+                            </p>
+                            <p>
+                                His patient-first approach has made VisionCare a trusted name across Ranchi. He continually leads community outreach programs to ensure accessible eye screenings for all.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Portrait -->
+                    <div class="lg:w-1/2 flex justify-center lg:justify-end w-full">
+                        <div class="relative w-72 h-[400px] md:w-[400px] md:h-[500px] group">
+                            <!-- Elegant layered border effect -->
+                            <div class="absolute -inset-4 border-2 border-medical-mint rounded-3xl z-0 transform group-hover:scale-105 transition-transform duration-500"></div>
+                            <div class="absolute -inset-4 border-2 border-medical-deepteal/20 rounded-3xl z-0 transform translate-x-4 translate-y-4"></div>
+                            
+                            <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Dr. Arun Kumar" class="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-2xl z-10">
+                            
+                            <!-- Experience Badge -->
+                            <div class="absolute -bottom-6 -left-6 z-20 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-4 group-hover:-translate-y-2 transition-transform duration-500">
+                                <div class="bg-medical-lightmint p-3 rounded-full text-medical-deepteal">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.965 11.965 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                </div>
+                                <div>
+                                    <span class="block text-2xl font-black text-medical-darkslate">20+</span>
+                                    <span class="text-sm font-semibold text-medical-slate uppercase tracking-wider">Years Exp.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Locations Section -->
+        <section id="locations" class="py-20 md:py-32 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12 md:mb-16">
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-medical-darkslate tracking-tight mb-4">Our <span class="text-medical-deepteal">Locations</span></h2>
+                    <p class="text-xl text-medical-slate">Find a VisionCare branch near you in Ranchi.</p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                    
+                    <!-- Left: Vertical Tabs (Horizontal scroll on mobile) -->
+                    <div class="lg:w-1/4 flex flex-row lg:flex-col gap-3 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
+                        <button onclick="switchLocation('branch1')" id="tab-branch1" class="location-tab active flex-shrink-0 text-left px-6 py-6 rounded-2xl border border-gray-200 bg-white transition-all w-64 lg:w-full relative overflow-hidden group hover:border-medical-deepteal">
+                            <!-- Active Indicator border (controlled by JS) -->
+                            <div class="absolute left-0 top-0 w-1.5 h-full bg-medical-deepteal rounded-l-2xl tab-indicator opacity-100 transition-opacity"></div>
+                            <span class="block text-xl font-bold text-gray-900 mb-1 group-hover:text-medical-deepteal transition-colors">Ashok Nagar</span>
+                            <span class="block text-sm text-medical-slate font-medium">Main Hospital</span>
+                        </button>
+
+                        <button onclick="switchLocation('branch2')" id="tab-branch2" class="location-tab flex-shrink-0 text-left px-6 py-6 rounded-2xl border border-gray-200 bg-white transition-all w-64 lg:w-full relative overflow-hidden group hover:border-medical-deepteal">
+                            <div class="absolute left-0 top-0 w-1.5 h-full bg-medical-deepteal rounded-l-2xl tab-indicator opacity-0 transition-opacity"></div>
+                            <span class="block text-xl font-bold text-gray-900 mb-1 group-hover:text-medical-deepteal transition-colors">Lalpur</span>
+                            <span class="block text-sm text-medical-slate font-medium">Diagnostic Center</span>
+                        </button>
+                    </div>
+
+                    <!-- Right: Map and Contact Info -->
+                    <div class="lg:w-3/4 bg-gray-50 rounded-3xl border border-gray-100 p-6 md:p-8">
+                        
+                        <!-- Branch 1 Content -->
+                        <div id="content-branch1" class="tab-content active h-full">
+                            <div class="flex flex-col md:flex-row gap-8 h-full">
+                                <div class="w-full md:w-3/5 h-64 md:h-[400px] bg-gray-200 rounded-2xl overflow-hidden shadow-inner">
+                                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3662.610582522774!2d85.3168868!3d23.3660856!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f4e104aa5db7dd%3A0xdc09d49d6899f43e!2sAshok%20Nagar%2C%20Ranchi%2C%20Jharkhand!5e0!3m2!1sen!2sin!4v1689000000000!5m2!1sen!2sin" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                </div>
+                                <div class="w-full md:w-2/5 flex flex-col justify-center space-y-8">
+                                    <div>
+                                        <h3 class="text-3xl font-bold text-gray-900 mb-4">Ashok Nagar Branch</h3>
+                                        <div class="flex items-start gap-4 text-gray-700">
+                                            <div class="bg-medical-mint p-2 rounded-lg text-medical-deepteal shrink-0">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                            </div>
+                                            <p class="text-lg leading-relaxed mt-1">123 Main Road, Ashok Nagar,<br>Ranchi, Jharkhand 834002</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-4 text-gray-700 font-semibold">
+                                            <div class="bg-gray-100 p-2 rounded-lg text-medical-slate shrink-0">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                            </div>
+                                            <span>+91 98765 43210</span>
+                                        </div>
+                                        <div class="flex items-center gap-4 text-gray-700 font-semibold">
+                                            <div class="bg-gray-100 p-2 rounded-lg text-medical-slate shrink-0">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                            <span>Mon - Sat: 9:00 AM - 8:00 PM</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Branch 2 Content -->
+                        <div id="content-branch2" class="tab-content h-full">
+                            <div class="flex flex-col md:flex-row gap-8 h-full">
+                                <div class="w-full md:w-3/5 h-64 md:h-[400px] bg-gray-200 rounded-2xl overflow-hidden shadow-inner">
+                                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3662.3364956105315!2d85.3346944!3d23.3760444!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f4e15ba409893d%3A0x6b7724128f7aeb1!2sLalpur%2C%20Ranchi%2C%20Jharkhand!5e0!3m2!1sen!2sin!4v1689000000001!5m2!1sen!2sin" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                </div>
+                                <div class="w-full md:w-2/5 flex flex-col justify-center space-y-8">
+                                    <div>
+                                        <h3 class="text-3xl font-bold text-gray-900 mb-4">Lalpur Center</h3>
+                                        <div class="flex items-start gap-4 text-gray-700">
+                                            <div class="bg-medical-mint p-2 rounded-lg text-medical-deepteal shrink-0">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                            </div>
+                                            <p class="text-lg leading-relaxed mt-1">Circular Road, Near Chowk,<br>Lalpur, Ranchi, Jharkhand 834001</p>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-4 text-gray-700 font-semibold">
+                                            <div class="bg-gray-100 p-2 rounded-lg text-medical-slate shrink-0">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                            </div>
+                                            <span>+91 98765 00000</span>
+                                        </div>
+                                        <div class="flex items-center gap-4 text-gray-700 font-semibold">
+                                            <div class="bg-gray-100 p-2 rounded-lg text-medical-slate shrink-0">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                            <span>Mon - Sun: 10:00 AM - 6:00 PM</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Appointment Section -->
+        <section id="appointment" class="py-24 bg-medical-deepteal relative overflow-hidden">
+            <!-- Decorative Background Element -->
+            <div class="absolute top-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="bg-white rounded-3xl p-8 md:p-14 shadow-2xl">
+                    <div class="mb-10 text-center md:text-left">
+                        <h2 class="text-4xl font-extrabold text-medical-darkslate mb-3">Book an Appointment</h2>
+                        <p class="text-lg text-medical-slate">Fill out the form below and our team will get back to you to confirm your slot.</p>
+                    </div>
+                    
+                    <form onsubmit="handleFormSubmit(event)" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Name -->
+                            <div>
+                                <label for="name" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Full Name</label>
+                                <input type="text" id="name" required class="w-full px-5 py-4 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-medical-deepteal focus:border-transparent outline-none transition-all font-medium" placeholder="Enter your full name">
+                            </div>
+                            <!-- Phone -->
+                            <div>
+                                <label for="phone" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Phone Number</label>
+                                <input type="tel" id="phone" required class="w-full px-5 py-4 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-medical-deepteal focus:border-transparent outline-none transition-all font-medium" placeholder="+91 XXXXX XXXXX">
+                            </div>
+                            <!-- Date -->
+                            <div>
+                                <label for="date" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Preferred Date</label>
+                                <input type="date" id="date" required class="w-full px-5 py-4 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-medical-deepteal focus:border-transparent outline-none transition-all text-gray-700 font-medium">
+                            </div>
+                            <!-- Branch Select -->
+                            <div>
+                                <label for="branch-select" class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Select Branch</label>
+                                <div class="relative">
+                                    <select id="branch-select" class="w-full px-5 py-4 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-medical-deepteal focus:border-transparent outline-none transition-all text-gray-700 font-medium appearance-none cursor-pointer">
+                                        <option value="ashok-nagar">Ashok Nagar Branch</option>
+                                        <option value="lalpur">Lalpur Branch</option>
+                                    </select>
+                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="pt-6">
+                            <button type="submit" class="w-full bg-medical-darkslate hover:bg-gray-900 text-white font-bold text-lg py-5 rounded-xl transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1 duration-200 flex justify-center items-center gap-2">
+                                Request Appointment
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Success Message Container -->
+                        <div id="success-msg" class="hidden text-center text-emerald-700 font-bold bg-emerald-50 py-4 rounded-xl border border-emerald-200 mt-4 transition-all">
+                            Thank you! Your appointment request has been received.
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-10 text-center border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-center items-center gap-2 mb-4 opacity-50">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            </div>
+            <p>&copy; <span id="year"></span> VisionCare Eye Hospital. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Set current year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // --- Mobile Menu Toggle Logic ---
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileLinks = document.querySelectorAll('.mobile-link');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close mobile menu when a link is clicked
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // --- Hero Image Carousel Logic ---
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        function showNextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+        
+        // Initial setup and interval
+        if (slides.length > 0) {
+            slides[0].classList.add('active');
+            setInterval(showNextSlide, 6000); // Change image every 6 seconds
+        }
+
+        // --- Locations Tab Switching Logic ---
+        function switchLocation(tabId) {
+            // 1. Reset all tabs styles (remove shadows, reset border, hide indicator)
+            const tabs = document.querySelectorAll('.location-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('shadow-lg', 'border-medical-deepteal');
+                tab.classList.add('border-gray-200');
+                const indicator = tab.querySelector('.tab-indicator');
+                if(indicator) indicator.classList.remove('opacity-100');
+                if(indicator) indicator.classList.add('opacity-0');
+            });
+
+            // 2. Hide all content panes
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // 3. Set Active styling to clicked tab
+            const activeTab = document.getElementById('tab-' + tabId);
+            activeTab.classList.remove('border-gray-200');
+            activeTab.classList.add('shadow-lg', 'border-medical-deepteal');
+            const activeIndicator = activeTab.querySelector('.tab-indicator');
+            if(activeIndicator) activeIndicator.classList.remove('opacity-0');
+            if(activeIndicator) activeIndicator.classList.add('opacity-100');
+
+            // 4. Show active content pane
+            const activeContent = document.getElementById('content-' + tabId);
+            activeContent.classList.add('active');
+        }
+
+        // Initialize first tab as strictly active visually on load
+        document.addEventListener('DOMContentLoaded', () => {
+            switchLocation('branch1');
+        });
+
+        // --- Form Submission Simulation ---
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const msg = document.getElementById('success-msg');
+            
+            // Visual feedback on button
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = 'Processing...';
+            submitBtn.disabled = true;
+
+            // Simulate API Call
+            setTimeout(() => {
+                msg.classList.remove('hidden');
+                form.reset();
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Hide message after 4 seconds
+                setTimeout(() => {
+                    msg.classList.add('hidden');
+                }, 4000);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
