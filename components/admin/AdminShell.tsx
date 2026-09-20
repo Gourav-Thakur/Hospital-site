@@ -14,9 +14,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     router.refresh();
   }
 
+  // Legacy "/admin/appointments" tab hidden — the PMS appointment flow (patient-linked)
+  // replaces it in the Appointments slice.
   const nav = [
     { href: "/admin", label: "Dashboard" },
-    { href: "/admin/appointments", label: "Appointments" },
+    { href: "/admin/patients", label: "Patients" },
   ];
 
   return (

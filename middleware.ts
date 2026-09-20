@@ -9,10 +9,10 @@ export async function middleware(req: NextRequest) {
   const session = await verifySession(token);
 
   const isLoginPage = pathname === "/admin/login";
-  const isLoginApi = pathname === "/api/admin/login";
+  const isAuthApi = pathname === "/api/admin/login" || pathname === "/api/admin/logout";
 
-  // API: appointments require a valid session.
-  if (pathname.startsWith("/api/appointments")) {
+  // API: everything except the auth endpoints requires a valid session.
+  if (pathname.startsWith("/api/") && !isAuthApi) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -41,5 +41,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/appointments/:path*"],
+  matcher: ["/admin/:path*", "/api/:path*"],
 };
