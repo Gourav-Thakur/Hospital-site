@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, desc, eq, ilike, or } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { patient } from "@/db/schema";
 import { getAdmin } from "@/lib/require-admin";
@@ -7,12 +7,19 @@ import { patientNoFromId } from "@/lib/pms-types";
 
 export const runtime = "nodejs";
 
+function clamp(n: number, lo: number, hi: number) {
+  return Math.min(hi, Math.max(lo, n));
+}
+
 export async function GET(req: NextRequest) {
   if (!(await getAdmin())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const q = req.nextUrl.searchParams.get("q")?.trim();
-  const includeArchived = req.nextUrl.searchParams.get("archived") === "1";
+  const sp = req.nextUrl.searchParams;
+  const q = sp.get("q")?.trim();
+  const includeArchived = sp.get("archived") === "1";
+  const page = clamp(Number(sp.get("page")) || 1, 1, 100000);
+  const pageSize = clamp(Number(sp.get("pageSize")) || 20, 1, 100);
 
   const filters = [];
   if (!includeArchived) filters.push(eq(patient.archived, false));
@@ -20,15 +27,14 @@ export async function GET(req: NextRequest) {
     const like = `%${q}%`;
     filters.push(or(ilike(patient.name, like), ilike(patient.phone, like), ilike(patient.patientNo, like))!);
   }
+  const where = filters.length ? and(...filters) : undefined;
 
-  const rows = await db
-    .select()
-    .from(patient)
-    .where(filters.length ? and(...filters) : undefined)
-    .orderBy(desc(patient.createdAt))
-    .limit(200);
+  const [rows, [{ n }]] = await Promise.all([
+    db.select().from(patient).where(where).orderBy(desc(patient.createdAt)).limit(pageSize).offset((page - 1) * pageSize),
+    db.select({ n: sql<number>`count(*)::int` }).from(patient).where(where),
+  ]);
 
-  return NextResponse.json({ patients: rows });
+  return NextResponse.json({ patients: rows, total: n, page, pageSize });
 }
 
 export async function POST(req: NextRequest) {

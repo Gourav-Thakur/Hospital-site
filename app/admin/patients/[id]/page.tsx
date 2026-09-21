@@ -1,8 +1,10 @@
-import { eq } from "drizzle-orm";
+import { and, asc, eq, gte, inArray } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import AdminShell from "@/components/admin/AdminShell";
 import { db } from "@/db";
-import { patient } from "@/db/schema";
+import { patient, appointment } from "@/db/schema";
+import { istNow } from "@/lib/availability";
+import { fmt12 } from "@/lib/pms-types";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,17 @@ export default async function PatientProfilePage({ params }: { params: { id: str
 
   const [p] = await db.select().from(patient).where(eq(patient.id, id)).limit(1);
   if (!p) notFound();
+
+  const today = istNow().date;
+  const upcoming = await db
+    .select()
+    .from(appointment)
+    .where(and(
+      eq(appointment.patientId, id),
+      gte(appointment.date, today),
+      inArray(appointment.status, ["scheduled", "checked_in", "in_consultation"])
+    ))
+    .orderBy(asc(appointment.date), asc(appointment.intervalStart));
 
   return (
     <AdminShell>
@@ -70,8 +83,22 @@ export default async function PatientProfilePage({ params }: { params: { id: str
         {/* Upcoming appointments + visit timeline (populated in later slices) */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-surface border border-app rounded-2xl p-6">
-            <h2 className="text-lg font-bold mb-2">Upcoming Appointments</h2>
-            <p className="text-muted text-sm py-6 text-center">Appointment scheduling arrives in the next build slice.</p>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-bold">Upcoming Appointments</h2>
+              <a href="/admin/appointments" className="text-sm font-semibold text-medical-deepteal hover:underline">Book →</a>
+            </div>
+            {upcoming.length === 0 ? (
+              <p className="text-muted text-sm py-6 text-center">No upcoming appointments.</p>
+            ) : (
+              <ul className="divide-y divide-[color:var(--border)]">
+                {upcoming.map((a) => (
+                  <li key={a.id} className="py-3 flex items-center justify-between gap-4 text-sm">
+                    <span className="font-semibold">{fmtDate(a.date)} · {fmt12(a.intervalStart)}</span>
+                    <span className="text-muted capitalize">{a.status.replace("_", " ")}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           <div className="bg-surface border border-app rounded-2xl p-6">
             <h2 className="text-lg font-bold mb-2">Visit Timeline</h2>

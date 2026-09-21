@@ -3,6 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { type Patient } from "@/lib/pms-types";
 import PatientForm from "./PatientForm";
+import Pagination from "./Pagination";
+
+const PAGE_SIZE = 20;
 
 function ageFromDob(dob: string | null): string {
   if (!dob) return "—";
@@ -14,6 +17,8 @@ function ageFromDob(dob: string | null): string {
 
 export default function PatientsManager() {
   const [items, setItems] = useState<Patient[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -21,25 +26,28 @@ export default function PatientsManager() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Patient | null>(null);
 
+  // Reset to page 1 whenever the filters change.
+  useEffect(() => { setPage(1); }, [query, showArchived]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
       if (query.trim()) params.set("q", query.trim());
       if (showArchived) params.set("archived", "1");
       const res = await fetch("/api/patients?" + params.toString());
       if (!res.ok) throw new Error();
       const data = await res.json();
       setItems(data.patients);
+      setTotal(data.total);
     } catch {
       setError("Could not load patients.");
     } finally {
       setLoading(false);
     }
-  }, [query, showArchived]);
+  }, [query, showArchived, page]);
 
-  // Debounced reload on query / filter change.
   useEffect(() => {
     const t = setTimeout(load, 250);
     return () => clearTimeout(t);
@@ -59,7 +67,7 @@ export default function PatientsManager() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-extrabold">Patients</h1>
-          <p className="text-muted">{items.length} shown</p>
+          <p className="text-muted">{total} total</p>
         </div>
         <button
           onClick={() => { setEditing(null); setFormOpen(true); }}
@@ -130,6 +138,8 @@ export default function PatientsManager() {
           </table>
         </div>
       </div>
+
+      <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPage={setPage} />
 
       {formOpen && (
         <PatientForm
