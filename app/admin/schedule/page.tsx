@@ -1,12 +1,12 @@
 import AdminShell from "@/components/admin/AdminShell";
-import AppointmentsDay from "@/components/admin/AppointmentsDay";
+import ScheduleManager from "@/components/admin/ScheduleManager";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminAppointmentsPage() {
+export default function AdminSchedulePage() {
   return (
     <AdminShell>
-      <AppointmentsDay />
+      <ScheduleManager />
     </AdminShell>
   );
 }

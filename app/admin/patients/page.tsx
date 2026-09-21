@@ -1,12 +1,12 @@
 import AdminShell from "@/components/admin/AdminShell";
-import AppointmentsDay from "@/components/admin/AppointmentsDay";
+import PatientsManager from "@/components/admin/PatientsManager";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminAppointmentsPage() {
+export default function AdminPatientsPage() {
   return (
     <AdminShell>
-      <AppointmentsDay />
+      <PatientsManager />
     </AdminShell>
   );
 }
