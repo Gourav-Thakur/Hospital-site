@@ -71,7 +71,7 @@ export default function PatientsManager() {
         </div>
         <button
           onClick={() => { setEditing(null); setFormOpen(true); }}
-          className="inline-flex items-center gap-2 bg-medical-deepteal hover:bg-teal-800 text-white font-bold px-5 py-3 rounded-xl transition-all w-fit"
+          className="inline-flex items-center justify-center gap-2 bg-medical-deepteal hover:bg-teal-800 text-white font-bold px-5 py-3 rounded-xl transition-all w-full sm:w-fit"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
           New Patient
@@ -93,7 +93,35 @@ export default function PatientsManager() {
 
       {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      <div className="bg-surface border border-app rounded-2xl overflow-hidden">
+      {/* Mobile: cards */}
+      <div className="sm:hidden space-y-3">
+        {loading ? (
+          <p className="text-muted text-center py-10">Loading…</p>
+        ) : items.length === 0 ? (
+          <p className="text-muted text-center py-10 bg-surface border border-app rounded-2xl">No patients found.</p>
+        ) : (
+          items.map((p) => (
+            <div key={p.id} className={`bg-surface border border-app rounded-2xl p-4 ${p.archived ? "opacity-60" : ""}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <a href={`/admin/patients/${p.id}`} className="font-bold text-medical-deepteal hover:underline">{p.name}</a>
+                  <div className="text-sm text-muted">{p.phone}</div>
+                  <div className="text-xs text-muted font-mono mt-0.5">{p.patientNo} · {ageFromDob(p.dob)}{p.sex ? ` · ${p.sex[0].toUpperCase()}` : ""}</div>
+                </div>
+                {p.allergies && <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400">Allergy</span>}
+              </div>
+              <div className="flex gap-2 mt-3 pt-3 border-t border-app">
+                <a href={`/admin/patients/${p.id}`} className="flex-1 text-center px-3 py-2 rounded-lg bg-medical-mint text-medical-deepteal font-semibold text-sm">Open</a>
+                <button onClick={() => { setEditing(p); setFormOpen(true); }} className="flex-1 px-3 py-2 rounded-lg border border-app text-muted font-semibold text-sm">Edit</button>
+                <button onClick={() => toggleArchive(p)} className="flex-1 px-3 py-2 rounded-lg border border-app text-muted font-semibold text-sm">{p.archived ? "Restore" : "Archive"}</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden sm:block bg-surface border border-app rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-app text-muted uppercase text-xs tracking-wide">

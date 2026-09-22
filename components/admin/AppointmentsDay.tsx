@@ -66,14 +66,13 @@ export default function AppointmentsDay() {
           <h1 className="text-3xl font-extrabold">Appointments</h1>
           <p className="text-muted">{upcomingMode ? "Upcoming" : longDate(date)} · {total} total</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-            placeholder="Any date"
-            className="px-4 py-2.5 rounded-xl border border-app bg-surface outline-none text-app" />
+            className="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl border border-app bg-surface outline-none text-app" />
           {date && (
             <button onClick={() => setDate("")} className="px-3 py-2.5 rounded-xl border border-app font-semibold text-muted hover:text-app whitespace-nowrap">Clear</button>
           )}
-          <button onClick={() => setBooking(true)} className="inline-flex items-center gap-2 bg-medical-deepteal hover:bg-teal-800 text-white font-bold px-5 py-2.5 rounded-xl whitespace-nowrap">
+          <button onClick={() => setBooking(true)} className="inline-flex items-center justify-center gap-2 bg-medical-deepteal hover:bg-teal-800 text-white font-bold px-5 py-2.5 rounded-xl whitespace-nowrap grow sm:grow-0">
             + Book
           </button>
         </div>
