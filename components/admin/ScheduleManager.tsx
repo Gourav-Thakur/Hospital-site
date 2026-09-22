@@ -94,7 +94,7 @@ function WorkingHoursCard({ hours, loading, onChanged }: { hours: WorkingHours[]
         <label className="flex flex-col gap-1 text-xs font-bold uppercase text-muted">Slots/hr
           <input type="number" min={1} max={30} className={`${field} w-20`} value={slotsPerHour} onChange={(e) => setSlotsPerHour(Number(e.target.value))} />
         </label>
-        <button onClick={add} disabled={busy} className="px-4 py-2 rounded-lg bg-medical-deepteal hover:bg-teal-800 disabled:opacity-60 text-white font-bold text-sm">Add</button>
+        <button onClick={add} disabled={busy} className="px-4 py-2 rounded-lg bg-medical-deepteal hover:bg-teal-800 disabled:opacity-60 text-white font-bold text-sm w-full sm:w-auto">Add</button>
       </div>
       {err && <p className="text-red-600 text-sm mb-3">{err}</p>}
 
@@ -187,7 +187,7 @@ function ExceptionsCard({ exceptions, loading, onChanged }: { exceptions: Schedu
             </label>
           </>
         )}
-        <button onClick={add} disabled={busy || !date} className="px-4 py-2 rounded-lg bg-medical-deepteal hover:bg-teal-800 disabled:opacity-60 text-white font-bold text-sm">Add</button>
+        <button onClick={add} disabled={busy || !date} className="px-4 py-2 rounded-lg bg-medical-deepteal hover:bg-teal-800 disabled:opacity-60 text-white font-bold text-sm w-full sm:w-auto">Add</button>
       </div>
       {!needsTime && <p className="text-xs text-muted -mt-3 mb-3">Leave/holiday with no time = full day off.</p>}
       {err && <p className="text-red-600 text-sm mb-3">{err}</p>}
