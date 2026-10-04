@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { fmt12, longDate, shortDate, APPT_STATUS_LABELS, type Appointment } from "@/lib/pms-types";
+import { fmt12, longDate, shortDate, APPT_STATUS_LABELS, APPT_STATUSES, type Appointment } from "@/lib/pms-types";
 import BookAppointmentModal from "./BookAppointmentModal";
 import RescheduleModal from "./RescheduleModal";
 import Pagination from "./Pagination";
@@ -54,6 +54,13 @@ export default function AppointmentsDay() {
       body: JSON.stringify({ status }),
     });
     load();
+  }
+
+  // Status dropdown: cancelling needs a reason, so route it through the modal.
+  function onStatusSelect(a: Appointment, status: string) {
+    if (status === a.status) return;
+    if (status === "cancelled") { setCancelling(a); return; }
+    setStatus(a, status);
   }
 
   const upcomingMode = !date;
@@ -109,27 +116,26 @@ export default function AppointmentsDay() {
                       {a.status === "cancelled" && a.cancelReason ? ` · ${a.cancelReason}` : ""}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 shrink-0">
-                    {a.status === "scheduled" && (
-                      <>
-                        <ActBtn onClick={() => setStatus(a, "checked_in")} tone="primary">Check in</ActBtn>
-                        <ActBtn onClick={() => setRescheduling(a)}>Reschedule</ActBtn>
-                        <ActBtn onClick={() => setCancelling(a)} tone="danger">Cancel</ActBtn>
-                        <ActBtn onClick={() => setStatus(a, "no_show")}>No-show</ActBtn>
-                      </>
-                    )}
-                    {a.status === "checked_in" && (
-                      <>
-                        <ActBtn onClick={() => setStatus(a, "in_consultation")} tone="primary">Start consult</ActBtn>
-                        <ActBtn onClick={() => setCancelling(a)} tone="danger">Cancel</ActBtn>
-                      </>
-                    )}
+                  <div className="flex flex-wrap gap-2 shrink-0 items-center">
+                    {/* Quick forward actions */}
+                    {a.status === "scheduled" && <ActBtn onClick={() => setStatus(a, "checked_in")} tone="primary">Check in</ActBtn>}
+                    {a.status === "checked_in" && <ActBtn onClick={() => setStatus(a, "in_consultation")} tone="primary">Start consult</ActBtn>}
                     {a.status === "in_consultation" && (
                       <>
                         <a href={`/admin/patients/${a.patientId}/prescription`} className="px-3 py-1.5 rounded-lg text-sm font-semibold text-medical-deepteal border border-app hover:bg-medical-mint">Prescription</a>
                         <ActBtn onClick={() => setStatus(a, "completed")} tone="primary">Complete</ActBtn>
                       </>
                     )}
+                    <ActBtn onClick={() => setRescheduling(a)}>Reschedule</ActBtn>
+                    {/* Full freedom: set any status (undo included) */}
+                    <select
+                      value={a.status}
+                      onChange={(e) => onStatusSelect(a, e.target.value)}
+                      title="Change status"
+                      className="px-2 py-1.5 rounded-lg border border-app bg-surface text-sm font-semibold text-muted outline-none cursor-pointer hover:border-medical-deepteal"
+                    >
+                      {APPT_STATUSES.map((s) => <option key={s} value={s}>{APPT_STATUS_LABELS[s]}</option>)}
+                    </select>
                   </div>
                 </div>
               </div>

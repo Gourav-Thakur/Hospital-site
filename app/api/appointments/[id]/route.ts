@@ -11,12 +11,7 @@ export const runtime = "nodejs";
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-// Allowed status transitions.
-const TRANSITIONS: Record<string, string[]> = {
-  scheduled: ["checked_in", "cancelled", "no_show"],
-  checked_in: ["in_consultation", "cancelled", "no_show"],
-  in_consultation: ["completed"],
-};
+const ALL_STATUSES = ["scheduled", "checked_in", "in_consultation", "completed", "cancelled", "no_show"];
 
 function parseId(idStr: string): number | null {
   const id = Number(idStr);
@@ -38,14 +33,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const [appt] = await db.select().from(appointment).where(eq(appointment.id, id)).limit(1);
   if (!appt) return NextResponse.json({ error: "Not found." }, { status: 404 });
 
-  const terminal = ["completed", "cancelled", "no_show"];
   const isReschedule = body.date !== undefined || body.intervalStart !== undefined;
 
-  // ---- Reschedule ----
+  // ---- Reschedule (allowed from any status) ----
   if (isReschedule) {
-    if (terminal.includes(appt.status))
-      return NextResponse.json({ error: "Cannot reschedule a finished appointment." }, { status: 400 });
-
     const newDate = body.date ? String(body.date) : appt.date;
     const newStart = hhmm(body.intervalStart ? String(body.intervalStart) : appt.intervalStart);
     if (!DATE_RE.test(newDate)) return NextResponse.json({ error: "Valid date required." }, { status: 400 });
@@ -94,18 +85,46 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
   }
 
-  // ---- Status change ----
+  // ---- Status change (full freedom: any status -> any status, incl. undo) ----
   if (body.status !== undefined) {
     const next = String(body.status);
-    const allowed = TRANSITIONS[appt.status] ?? [];
-    if (!allowed.includes(next))
-      return NextResponse.json({ error: `Cannot change from ${appt.status} to ${next}.` }, { status: 400 });
+    if (!ALL_STATUSES.includes(next)) return NextResponse.json({ error: "Invalid status." }, { status: 400 });
 
-    const updates: Record<string, unknown> = { status: next, updatedAt: new Date() };
-    if (next === "cancelled") updates.cancelReason = body.cancelReason ? String(body.cancelReason).trim() : null;
+    const updates: Record<string, unknown> = {
+      status: next,
+      updatedAt: new Date(),
+      cancelReason: next === "cancelled" ? (body.cancelReason ? String(body.cancelReason).trim() : null) : null,
+    };
 
-    const [updated] = await db.update(appointment).set(updates).where(eq(appointment.id, id)).returning();
-    return NextResponse.json({ appointment: updated });
+    // Re-activating (e.g. undoing a cancel/no-show) may collide with a slot that has
+    // since refilled. Take the next free position — capacity can be exceeded on purpose.
+    const activating = (ACTIVE_STATUSES as readonly string[]).includes(next);
+    const freePosition = async (): Promise<number> => {
+      const rows = await db.select({ position: appointment.position }).from(appointment).where(and(
+        eq(appointment.date, appt.date),
+        eq(appointment.intervalStart, appt.intervalStart),
+        ne(appointment.id, id),
+        inArray(appointment.status, ACTIVE_STATUSES as unknown as string[])
+      ));
+      const taken = new Set(rows.map((r) => r.position));
+      if (!taken.has(appt.position)) return appt.position;
+      let pos = 1; while (taken.has(pos)) pos++;
+      return pos;
+    };
+    if (activating) updates.position = await freePosition();
+
+    try {
+      const [updated] = await db.update(appointment).set(updates).where(eq(appointment.id, id)).returning();
+      return NextResponse.json({ appointment: updated });
+    } catch (e: unknown) {
+      const msg = String((e as { message?: string })?.message ?? e);
+      if (activating && (msg.includes("appt_active_slot_idx") || msg.includes("23505"))) {
+        updates.position = await freePosition();
+        const [updated] = await db.update(appointment).set(updates).where(eq(appointment.id, id)).returning();
+        return NextResponse.json({ appointment: updated });
+      }
+      throw e;
+    }
   }
 
   return NextResponse.json({ error: "Nothing to update." }, { status: 400 });

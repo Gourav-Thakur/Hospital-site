@@ -96,6 +96,10 @@ export type ApptStatus =
 
 export const APPT_TYPES = ["new", "follow_up"] as const;
 
+export const APPT_STATUSES: ApptStatus[] = [
+  "scheduled", "checked_in", "in_consultation", "completed", "cancelled", "no_show",
+];
+
 export const APPT_STATUS_LABELS: Record<string, string> = {
   scheduled: "Scheduled",
   checked_in: "Checked-in",
