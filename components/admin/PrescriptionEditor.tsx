@@ -82,7 +82,7 @@ export default function PrescriptionEditor({ patient, letterhead }: { patient: P
           @page { size: A4; margin: 12mm 14mm; }
           body * { visibility: hidden !important; }
           #rx-sheet, #rx-sheet * { visibility: visible !important; }
-          #rx-sheet { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none !important; }
+          #rx-sheet { position: absolute; left: 0; top: 0; width: 100%; min-height: 262mm !important; padding: 0 !important; box-shadow: none !important; }
           .no-print { display: none !important; }
         }
       `}</style>
@@ -178,10 +178,10 @@ export default function PrescriptionEditor({ patient, letterhead }: { patient: P
         {/* ---------- A4 preview ---------- */}
         <div>
           <p className="no-print text-xs font-bold uppercase tracking-wide text-muted mb-2">Preview</p>
-          <div id="rx-sheet" className="bg-white text-black shadow-lg mx-auto" style={{ width: "100%", maxWidth: "210mm", minHeight: "297mm", padding: "12mm 14mm", fontFamily: "'Helvetica Neue', Arial, sans-serif", display: "flex", flexDirection: "column" }}>
+          <div id="rx-sheet" className="bg-white text-black shadow-lg mx-auto" style={{ width: "100%", maxWidth: "210mm", minHeight: "297mm", padding: "12mm 14mm", boxSizing: "border-box", fontFamily: "'Helvetica Neue', Arial, sans-serif", display: "flex", flexDirection: "column" }}>
             {letterhead ? (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={letterhead} alt="Letterhead" style={{ width: "100%", objectFit: "contain", marginBottom: "10px" }} />
+              <img src={letterhead} alt="Letterhead" style={{ maxWidth: "100%", maxHeight: "60mm", width: "auto", height: "auto", display: "block", margin: "0 auto 10px" }} />
             ) : (
               <div style={{ textAlign: "center", color: "#aaa", borderBottom: `2px solid ${TEAL}`, paddingBottom: "8px", marginBottom: "10px", fontSize: "12px" }}>[ No letterhead — add one in Settings ]</div>
             )}
@@ -191,9 +191,7 @@ export default function PrescriptionEditor({ patient, letterhead }: { patient: P
               <span><b>Patient:</b> {patient.name}</span>
               <span><b>Age/Sex:</b> {ageFromDob(patient.dob) || "—"}{patient.sex ? ` / ${patient.sex[0].toUpperCase()}` : ""}</span>
               <span><b>Date:</b> {longDate(today)}</span>
-              <span><b>Patient ID:</b> {patient.patientNo}</span>
-              <span><b>Contact:</b> {patient.phone}</span>
-              <span />
+              <span style={{ gridColumn: "span 3" }}><b>Contact:</b> {patient.phone}</span>
             </div>
 
             {patient.allergies && <div style={{ color: "#b91c1c", fontWeight: 700, fontSize: "12px", marginBottom: "8px" }}>Allergies: {patient.allergies}</div>}
