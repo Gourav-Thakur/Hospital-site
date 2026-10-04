@@ -133,3 +133,16 @@ export type AvailInterval = {
 };
 
 export const MAX_BOOK_DAYS_AHEAD = 90;
+
+// ---- Medicines & prescriptions ----
+export type Medicine = { id: number; name: string; active: boolean };
+
+export type RxLine = { medicineName: string; note: string };
+
+export function ageFromDob(dob: string | null): string {
+  if (!dob) return "";
+  const d = new Date(dob + "T00:00:00");
+  if (isNaN(d.getTime())) return "";
+  const years = Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000));
+  return `${years}y`;
+}

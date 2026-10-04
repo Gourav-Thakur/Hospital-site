@@ -1,12 +1,6 @@
-import AdminShell from "@/components/admin/AdminShell";
-import ScheduleManager from "@/components/admin/ScheduleManager";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default function AdminSchedulePage() {
-  return (
-    <AdminShell>
-      <ScheduleManager />
-    </AdminShell>
-  );
+// Schedule moved under Settings.
+export default function LegacyScheduleRedirect() {
+  redirect("/admin/settings");
 }

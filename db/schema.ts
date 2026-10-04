@@ -131,18 +131,51 @@ export const visit = pgTable("visit", {
   createdBy: text("created_by"),
 });
 
-export const prescriptionImage = pgTable("prescription_image", {
+// Master medicine list (name only). Grows via inline-add and CSV import.
+export const medicine = pgTable(
+  "medicine",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    active: boolean("active").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    nameIdx: index("medicine_name_idx").on(t.name),
+  })
+);
+
+// A printed prescription for a patient (optionally tied to a visit later).
+export const prescription = pgTable("prescription", {
   id: serial("id").primaryKey(),
-  visitId: integer("visit_id")
-    .notNull()
-    .references(() => visit.id),
-  url: text("url").notNull(),
-  mimeType: text("mime_type"),
-  sizeBytes: integer("size_bytes"),
-  uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
+  patientId: integer("patient_id").notNull().references(() => patient.id),
+  visitId: integer("visit_id").references(() => visit.id),
+  notes: text("notes"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdBy: text("created_by"),
+});
+
+// One line of a prescription. medicineName is a snapshot so edits to the master
+// list never alter a previously printed prescription.
+export const prescriptionItem = pgTable("prescription_item", {
+  id: serial("id").primaryKey(),
+  prescriptionId: integer("prescription_id").notNull().references(() => prescription.id),
+  medicineName: text("medicine_name").notNull(),
+  note: text("note"),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+// Simple key/value app settings (e.g. "letterhead" -> base64 image data URL).
+export const settings = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export type Patient = typeof patient.$inferSelect;
 export type NewPatient = typeof patient.$inferInsert;
 export type PmsAppointment = typeof appointment.$inferSelect;
 export type Visit = typeof visit.$inferSelect;
+export type Medicine = typeof medicine.$inferSelect;
+export type Prescription = typeof prescription.$inferSelect;
+export type PrescriptionItem = typeof prescriptionItem.$inferSelect;
