@@ -181,7 +181,7 @@ export default function PrescriptionEditor({ patient, letterhead }: { patient: P
           <div id="rx-sheet" className="bg-white text-black shadow-lg mx-auto" style={{ width: "100%", maxWidth: "210mm", minHeight: "297mm", padding: "12mm 14mm", boxSizing: "border-box", fontFamily: "'Helvetica Neue', Arial, sans-serif", display: "flex", flexDirection: "column" }}>
             {letterhead ? (
               /* eslint-disable-next-line @next/next/no-img-element */
-              <img src={letterhead} alt="Letterhead" style={{ maxWidth: "100%", maxHeight: "60mm", width: "auto", height: "auto", display: "block", margin: "0 auto 10px" }} />
+              <img src={letterhead} alt="Letterhead" style={{ width: "100%", height: "auto", maxHeight: "70mm", objectFit: "contain", display: "block", marginBottom: "10px" }} />
             ) : (
               <div style={{ textAlign: "center", color: "#aaa", borderBottom: `2px solid ${TEAL}`, paddingBottom: "8px", marginBottom: "10px", fontSize: "12px" }}>[ No letterhead — add one in Settings ]</div>
             )}
