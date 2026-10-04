@@ -151,6 +151,9 @@ export const prescription = pgTable("prescription", {
   patientId: integer("patient_id").notNull().references(() => patient.id),
   visitId: integer("visit_id").references(() => visit.id),
   notes: text("notes"),
+  nextReview: text("next_review"),
+  refraction: jsonb("refraction"), // { right:{sph,cyl,axis,va,add}, left:{...}, ipd, remarks }
+  findings: jsonb("findings"),     // { iop:{right,left}, slitLamp:{right,left}, fundus:{right,left} }
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   createdBy: text("created_by"),
 });
