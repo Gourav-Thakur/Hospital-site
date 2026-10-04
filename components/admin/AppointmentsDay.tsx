@@ -125,7 +125,10 @@ export default function AppointmentsDay() {
                       </>
                     )}
                     {a.status === "in_consultation" && (
-                      <ActBtn onClick={() => setStatus(a, "completed")} tone="primary">Complete</ActBtn>
+                      <>
+                        <a href={`/admin/patients/${a.patientId}/prescription`} className="px-3 py-1.5 rounded-lg text-sm font-semibold text-medical-deepteal border border-app hover:bg-medical-mint">Prescription</a>
+                        <ActBtn onClick={() => setStatus(a, "completed")} tone="primary">Complete</ActBtn>
+                      </>
                     )}
                   </div>
                 </div>

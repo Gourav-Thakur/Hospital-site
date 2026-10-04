@@ -133,3 +133,45 @@ export type AvailInterval = {
 };
 
 export const MAX_BOOK_DAYS_AHEAD = 90;
+
+// ---- Medicines & prescriptions ----
+export type Medicine = { id: number; name: string; active: boolean };
+
+export type RxLine = { medicineName: string; note: string };
+
+export type EyeRx = { sph: string; cyl: string; axis: string; va: string; add: string };
+export type Refraction = { right: EyeRx; left: EyeRx; ipd: string; remarks: string };
+export type Findings = {
+  iop: { right: string; left: string };
+  slitLamp: { right: string; left: string };
+  fundus: { right: string; left: string };
+};
+
+export const emptyEye = (): EyeRx => ({ sph: "", cyl: "", axis: "", va: "", add: "" });
+export const emptyRefraction = (): Refraction => ({ right: emptyEye(), left: emptyEye(), ipd: "", remarks: "" });
+export const emptyFindings = (): Findings => ({
+  iop: { right: "", left: "" },
+  slitLamp: { right: "", left: "" },
+  fundus: { right: "", left: "" },
+});
+
+export function refractionHasData(r: Refraction): boolean {
+  const eye = (e: EyeRx) => e.sph || e.cyl || e.axis || e.va || e.add;
+  return Boolean(eye(r.right) || eye(r.left) || r.ipd || r.remarks);
+}
+export function findingsHasData(f: Findings): boolean {
+  return Boolean(f.iop.right || f.iop.left || f.slitLamp.right || f.slitLamp.left || f.fundus.right || f.fundus.left);
+}
+
+// Single-doctor clinic — used on the printed prescription footer/signature.
+export const DOCTOR_NAME = "Dr. R.K Thakur";
+export const DOCTOR_TITLE = "Consultant Ophthalmologist";
+export const EYE_HEALTH_QUOTE = "Your eyes are the windows to the world — a yearly check-up keeps the view clear.";
+
+export function ageFromDob(dob: string | null): string {
+  if (!dob) return "";
+  const d = new Date(dob + "T00:00:00");
+  if (isNaN(d.getTime())) return "";
+  const years = Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000));
+  return `${years}y`;
+}
