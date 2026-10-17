@@ -16,3 +16,17 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const items = await db.select().from(prescriptionItem).where(eq(prescriptionItem.prescriptionId, id)).orderBy(asc(prescriptionItem.sortOrder));
   return NextResponse.json({ prescription: rx, items });
 }
+
+export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  if (!(await getAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const id = Number(params.id);
+  if (!Number.isInteger(id) || id <= 0) return NextResponse.json({ error: "Invalid id." }, { status: 400 });
+
+  const [, deletedPrescriptions] = await db.batch([
+    db.delete(prescriptionItem).where(eq(prescriptionItem.prescriptionId, id)),
+    db.delete(prescription).where(eq(prescription.id, id)).returning({ id: prescription.id }),
+  ]);
+  if (deletedPrescriptions.length === 0) return NextResponse.json({ error: "Not found." }, { status: 404 });
+
+  return NextResponse.json({ ok: true });
+}

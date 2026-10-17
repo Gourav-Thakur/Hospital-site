@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { prescription, prescriptionItem, patient } from "@/db/schema";
 import { getAdmin } from "@/lib/require-admin";
@@ -8,12 +8,32 @@ export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {
   if (!(await getAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const patientId = Number(req.nextUrl.searchParams.get("patientId"));
+  const sp = req.nextUrl.searchParams;
+  const patientId = Number(sp.get("patientId"));
   if (!Number.isInteger(patientId) || patientId <= 0)
     return NextResponse.json({ error: "patientId required." }, { status: 400 });
 
-  const rows = await db.select().from(prescription).where(eq(prescription.patientId, patientId)).orderBy(desc(prescription.createdAt));
-  return NextResponse.json({ prescriptions: rows });
+  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+  const page = clamp(Number(sp.get("page")) || 1, 1, 100000);
+  const pageSize = clamp(Number(sp.get("pageSize")) || 10, 1, 100);
+  const where = eq(prescription.patientId, patientId);
+
+  const [rows, [{ total }]] = await Promise.all([
+    db.select({
+      id: prescription.id,
+      createdAt: prescription.createdAt,
+      notes: prescription.notes,
+      nextReview: prescription.nextReview,
+    })
+      .from(prescription)
+      .where(where)
+      .orderBy(desc(prescription.createdAt), desc(prescription.id))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
+    db.select({ total: sql<number>`count(*)::int` }).from(prescription).where(where),
+  ]);
+
+  return NextResponse.json({ prescriptions: rows, total, page, pageSize });
 }
 
 export async function POST(req: NextRequest) {

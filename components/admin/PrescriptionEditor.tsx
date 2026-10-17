@@ -12,12 +12,47 @@ type P = { id: number; name: string; dob: string | null; sex: string | null; pat
 const TEAL = "#0F766E";
 const todayISO = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 
+async function readApiResponse(res: Response): Promise<unknown> {
+  const body = await res.text();
+  let data: unknown;
+
+  if (body) {
+    try {
+      data = JSON.parse(body);
+    } catch {
+      throw new Error("The server returned an invalid response.");
+    }
+  } else if (!res.ok) {
+    throw new Error(`Request failed (${res.status}).`);
+  } else {
+    throw new Error("The server returned an empty response.");
+  }
+
+  if (!res.ok) {
+    const message =
+      typeof data === "object" && data !== null && "error" in data && typeof data.error === "string"
+        ? data.error
+        : `Request failed (${res.status}).`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+function isMedicine(value: unknown): value is Medicine {
+  return typeof value === "object" && value !== null
+    && "id" in value && typeof value.id === "number"
+    && "name" in value && typeof value.name === "string"
+    && "active" in value && typeof value.active === "boolean";
+}
+
 export default function PrescriptionEditor({ patient, letterhead }: { patient: P; letterhead: string | null }) {
   const [notes, setNotes] = useState("");
   const [nextReview, setNextReview] = useState("");
   const [lines, setLines] = useState<RxLine[]>([]);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<Medicine[]>([]);
+  const [searchError, setSearchError] = useState("");
   const [showRefraction, setShowRefraction] = useState(false);
   const [refraction, setRefraction] = useState(emptyRefraction());
   const [showFindings, setShowFindings] = useState(false);
@@ -28,19 +63,45 @@ export default function PrescriptionEditor({ patient, letterhead }: { patient: P
 
   useEffect(() => {
     const q = search.trim();
+    setSearchError("");
     if (!q) { setResults([]); return; }
+    const controller = new AbortController();
     const t = setTimeout(async () => {
-      const d = await fetch("/api/medicines?pageSize=8&q=" + encodeURIComponent(q)).then((r) => r.json());
-      setResults(d.medicines ?? []);
+      try {
+        const res = await fetch("/api/medicines?pageSize=8&q=" + encodeURIComponent(q), { signal: controller.signal });
+        const data = await readApiResponse(res);
+        if (typeof data !== "object" || data === null || !("medicines" in data)
+          || !Array.isArray(data.medicines) || !data.medicines.every(isMedicine)) {
+          throw new Error("The server returned an invalid medicine list.");
+        }
+        setResults(data.medicines);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setResults([]);
+        setSearchError(err instanceof Error ? err.message : "Could not search medicines.");
+      }
     }, 180);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
   }, [search]);
 
   const addLine = (name: string) => { setLines((p) => [...p, { medicineName: name, note: "" }]); setSearch(""); setResults([]); };
   const addNew = async () => {
     const name = search.trim(); if (!name) return;
-    await fetch("/api/medicines", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }) });
-    addLine(name);
+    setSearchError("");
+    try {
+      const res = await fetch("/api/medicines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      await readApiResponse(res);
+      addLine(name);
+    } catch (err) {
+      setSearchError(err instanceof Error ? err.message : "Could not add this medicine.");
+    }
   };
   const setNote = (i: number, note: string) => setLines((p) => p.map((l, idx) => (idx === i ? { ...l, note } : l)));
   const removeLine = (i: number) => setLines((p) => p.filter((_, idx) => idx !== i));
@@ -152,6 +213,7 @@ export default function PrescriptionEditor({ patient, letterhead }: { patient: P
                 {!exactMatch && <button onClick={addNew} className="w-full text-left px-4 py-2.5 hover:bg-app text-medical-deepteal font-semibold">➕ Add “{search.trim()}” to the list</button>}
               </div>
             )}
+            {searchError && <p className="mt-2 text-sm text-red-600">{searchError}</p>}
           </div>
           <div className="space-y-2">
             {lines.length === 0 ? <p className="text-muted text-sm">No medicines added yet.</p> : lines.map((l, i) => (

@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { patient, appointment } from "@/db/schema";
 import { istNow } from "@/lib/availability";
 import { fmt12 } from "@/lib/pms-types";
+import PrescriptionTimeline from "@/components/admin/PrescriptionTimeline";
 
 export const dynamic = "force-dynamic";
 
@@ -104,10 +105,7 @@ export default async function PatientProfilePage({ params }: { params: { id: str
               </ul>
             )}
           </div>
-          <div className="bg-surface border border-app rounded-2xl p-6">
-            <h2 className="text-lg font-bold mb-2">Visit Timeline</h2>
-            <p className="text-muted text-sm py-6 text-center">Visit records &amp; prescriptions arrive in a later slice.</p>
-          </div>
+          <PrescriptionTimeline patientId={p.id} />
         </div>
       </div>
     </AdminShell>
